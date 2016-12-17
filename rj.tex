@@ -1,0 +1,278 @@
+﻿\documentclass[12pt]{article}
+\usepackage[authoryear,round,comma,sort]{natbib}
+\usepackage{url}
+
+\author{Markus Forsberg, Harald Hammarstr\"om and Shafqat Virk}
+\title{Shaf-Cat: Capturing Language Diversity Through Raw-Text Induced Language Profiles}
+
+\begin{document}
+\maketitle
+
+\section{Summary}
+
+Sammanfattningen ska skrivas på svenska och engelska och får omfatta max 1 500 tecken inklusive blanksteg och ska förklara varför forskningsuppgiften är viktig, dess syfte samt hur den ska genomföras. Den ska formuleras så att en intresserad allmänhet kan förstå. Om ansökan beviljas publiceras sammanfattningarna direkt på RJ:s webbplats.
+
+\section{Project Description}
+The diversity of the 6,500 languages of world represent an
+irreplaceable and abundant resource for understanding the unique
+communication system of our species. Rather than to study just one
+language, such as English, through the comparison of many languages we
+are better equipped to trace the history of the populations that speak
+them as well as to understand the processing machinery of our brains
+(cf.~\citealt{typ:EvansLevinson:Universals}).
+
+For most of its history, comparison of languages has been carried out
+by humans qualitatively. This research framework is naturally bounded
+by the limits of human capacities, and as such can only target a few
+dozen languages in detail and/or target greatly simplified
+characteristics of more languages. We are now entering a phase where
+it is practical to use computers for language comparison, entertaining
+the potential to compare languages in much greater breadth and
+depth. However, the databases used for computational comparisons are
+still designed and curated manually by humans who read grammars and
+dictionaries in book form, and herein lies the bottleneck. Firstly, as
+a language is a system of conventional form-meaning pairs, it is not
+obvious how to represent it in machine-readable form. Especially when
+it comes to grammar (as opposed to phonology or lexicon), theory is
+lacking on what, how and to what granularity it should be rendered
+(cf.~\citealt{ling:Cysouw:Typology-Types}). As a result, linguistic
+typological databases used today reflect collections of properties
+traditionally of interest, but without systematic motivation in terms
+of in terms of functional load, role in the language system or the
+like \citep{ling:Bickel:Distributional-Typology}.  Secondly, manual
+data collection by humans is a time-expensive enterprise --- a
+database treating a single linguistic topic for some 200 languages is
+typically the size of a PhD project, whereas the world has
+6,500 languages and there is grammatical information for over 4,000
+(see \url{glottolog.org}).
+ 
+The present project aims to fill this gap, in three steps:
+\begin{description}
+\item[Language Profiles:] The development of a theoretically motivated
+  notion of a \emph{language profile}, i.e., a machine-readable
+  representation of features of the grammar of a language. This notion
+  will be grounded in the functional load of various parts of the
+  language system and parametrized by a single scale indicating the
+  level of detail, whereby a low level of detail results in a single
+  feature profile, a relatively high level of detail results in a
+  profile with many features and an even higher levels of detail
+  approximates a language 'in its full glory'.
+
+\item[Profile Extraction from Raw Text:] A large collection of freely
+  available grammatical descriptions of languages of the world
+  (see below)
+  (TODO cite etc) have been OCR:ed and are ready for NLP analysis.
+  Blah blah 
+
+\item[Application:] Two concrete case-studies related to linguistic
+  diversity will be performed within the realm of the project as a
+  proof-of-concept, one targeting population history and one targeting
+  language-universal tendencies. For the first, extracted language
+  profiles will be used to (in)validate the macro-areal division of
+  the (typological profiles of the) languages of Africa
+  \citep{hv:Guldemann:Africa:Macro-Areas} and improve on it in detail
+  and coverage. For the second, extracted information relating to
+  constituent- and morpheme ordering properties will be compared to
+  data on the 'suffixing preference'
+  \citep{ling:Himmelmann:Suffixing:2014} and the extensive study of
+  word order by \citet{ling:Dryer:Word-Order}, also improving them on
+  detail and coverage.
+\end{description}
+
+The basis for the entire project is a collection of over 6,000 raw
+text grammatical description digitally available for computational
+processing. The collection consists of (1) out-of-copyright texts
+digitized by national libraries, archives, scientific societies and
+other similar entities, and (2) texts posted online with a CC-BY-SA (or
+more liberal) license usually by university libraries and non-profit
+organizations (notably the Summer Institute of Linguistics). For each
+document, we know the language it is written in (the meta-language,
+usually English, French, German, Spanish or Mandarin Chinese), the
+language(s) described in it (the target language, typically one of the
+thousands of minority languages throught the world) and the type of
+description (comparative study, description of a specific features,
+phonological description, grammar sketch, full grammar etc). The
+collection can be enumerated using the bibliographical- and metadata
+is contained in the open-access bibliography of descriptive languages
+data at \url{glottolog.org}.
+
+The project applicants are committed to open-access framework and the
+data emanating from the present project will be deposited in long-term
+repositories at Spr\aa{}kbanen and \url{zenodo.org}.
+
+Creating language profiles through the mining of raw text data is a
+novel task so specific related work only consists of a few embroyonic
+steps taken by the applicants
+(\citealt{typ:Hammarstrom:Three-Approaches},
+\citealt{cl:Virk:TextCat}). However, the maturity of vector space
+semantic representations from raw text data
+\citep{cl:Mikolov:Words-Phrases}, OCR correction techniques (TODO
+ref), and the availability of evaluation data makes this project both
+feasible and evaluatable.
+
+In the realm of lexicon, several projects are in the process of
+digitizing legacy printed dictionaries, e.g., RefLex
+\citep{v:Segerer:RefLex}, PanLex (\url{www.panlex.org}), Asia-Pacific
+Data Warehouse \citep{ling:Cooper:Warehouse}, into structured
+databases. The representation of a lexicon is already a
+well-understood task so these projects have the character of
+engineering projects whereas for the proposed project, the
+representation of grammar is the major research question.  A different
+promising approach to extracting language profiles is to depart from
+Interlinear Glossed Text (IGT) rather than raw text or raw descriptive
+text \citep{lkl:Bender:From-IGT}. Such an approach is also on a sound
+theoretical footing but collections of IGT text, e.g., ODIN
+(\url{depts.washington.edu/uwcl/odin/}), ELAR
+(\url{http://elar.soas.ac.uk/},) DOBES (\url{dobes.mpi.nl/}) do not
+yet span enough languages and suffer from heterogeneities and
+usage/access restrictions.
+
+The potential for descriptive text extraction for grammatical
+comparison cannot cannot be underestimated; When successful it will
+transform the wealth of knowledge that was until recently (largely)
+collecting dust on the shelves into a data source multiplying tenfold
+the breadth and depth of under the command of the linguist.
+Beyond linguistics itself, the concept may also generalize to other
+areas of the humanities, such as religion or ethnography, who are
+engaged in cross-cultural comparison.
+
+
+\section{Project Plan}
+
+Projektbeskrivningen får omfatta max 9 600 tecken inklusive blanksteg, skrivas på engelska eller svenska och redovisa:
+
+
+\section{Researchers' Present Function in the Project, Relevant Skills and Merits, and Current Employment Situation}
+
+\subsection{Shafqat Virk}
+Shafqat Virk at 75\% FTE will perform the extraction of profiles from
+raw text data and its evaluation including (shallow) parsing, latent
+semantic indexing and other techniques from the NLP toolchain. Shafqat
+is currently a PostDoc at Spr\aa{}kbanken (Gothenburg University) in
+the LSI project TODO (what's it called officially?). He has a genuine
+background in Computational Linguistics and a thorough experience in
+the task of extracting grammatically relevant data from raw text
+descriptions in the latter project.
+
+\subsection{Harald Hammarstr\"om}
+Harald Hammarstr\"om at 50\% FTE will be responsible for the
+development of the language profile notion in aided by the text
+technology results by the other collaborators. He will also carry ot
+the tasks in the application phase. Harald is an Associate Lecturer at
+the Department of Linguistics and Philology (Uppsala University) and
+is an expert on language diversity and linguistic typology.
+
+\subsection{Markus Forsberg}
+Markus Forsberg at 25\% will adapt recent methods from the field of
+Deep Learning for NLP to enhance the semantic component in the profile
+extraction chain. He will also integrate relevant morphological and
+lexical resources and handle data archiving matters. Markus is
+currently co-director of Spr\aa{}banken (Gothenburg University). He
+has a solid background in Computational Linguistics and a decade of
+experience in the fields of text technology, information extraction,
+knowledge representation and linguistic resources.
+
+\subsection{Lars Borin?}
+TODO
+
+\section{Budget}
+Budgeten
+
+    Löner, LKP, drift samt arbetstid för icke-forskande personal ska specificeras. Uppge däremot inte indirekta kostnader och lokalkostnader.
+    Namnge all forskande personal. Lista dem som projektdeltagare med månadslön, LKP och arbetstid inom projektet.
+    Ange 0 kronor för projektdeltagare som inte avlönas inom projektet.
+    Redovisa även arbetstid och lönekostnader för eventuell icke-forskande personal, såsom assistenter och teknisk personal som Drift, men namnge dem inte.
+    Till varje beviljat projekt adderas ett bidrag till indirekta kostnader och lokalkostnader enligt den modell som RJ tillämpar.
+    Till varje projektanslag beviljar RJ även ett internationaliseringsbidrag. Bidraget kan användas för forskningsvistelser utomlands, inbjudan av utländska forskarkolleger, såväl nationella som internationella konferensresor och språkgranskning av manus på främmande språk. Ta därför inte upp dessa kostnader i din ansökan.
+    Till varje projektanslag beviljar RJ även ett bidrag till publicering med open access. Inte heller dessa kostnader ska därför tas upp i ansökan.
+
+Ospecificerade eller omotiverade kostnader beviljas inte.
+
+\bibliographystyle{apalike}
+\bibliography{hh,hhling,miscbooks}
+
+
+\end{document}
+
+
+\section{Research Question}
+
+\section{Purpose}
+
+\section{Theory and Method}
+
+\section{Contributions to the Scientific Frontier}
+
+\section{Most Important Publications of the Research Area}
+
+
+    forskningsfrågan
+    syftet
+    teori och metod
+    projektplan och motiveringar till projekttiden
+    bidrag till den internationella forskningsfronten
+    forskningsområdets internationellt viktigaste arbeten
+    forskarens/forskarnas funktion i projektet samt relevanta kompetenser och meriter
+    nuvarande anställningsförhållanden för all forskande personal
+    resursbehov (löner och drift) samt arbetstid för icke-forskande personal som specificeras och motiveras
+
+
+
+Med projekt avses väl definierade forskningsuppgifter inom samhällsvetenskap och humaniora som utförs av såväl enskilda forskare som av mindre forskargrupper med anknytning till Sverige. Forskarna är fria att själva definiera sin forskningsfråga. Projekt beviljas för maximalt tre år.
+
+
+
+Bedömningskriterier
+
+De avgörande kriterierna vid RJ:s beslut är den vetenskapliga kvaliteten i forskningsinnehållet, projektets genomförbarhet samt forskningens potentiella bidrag till internationell forskning.
+Beredningsprocess
+
+Ansökningsprocessen sker i två steg. Projekt bedöms och prioriteras i en eller flera av RJ:s beredningsgrupper som består av svenska och internationella forskare samt några av styrelsens riksdagsledamöter. De projekt som väljs ut för fortsatt beredning skickar in en utvecklad ansökan som sedan granskas av externa sakkunniga från Sverige eller utlandet, vars utlåtanden ligger till grund för beredningsgruppernas bedömning i andra omgången.
+
+Stiftelsens styrelse fattar det formella beslutet om forskningsanslagen. Skriftliga utlåtanden från de externa sakkunniga skickas till alla som har gått vidare till andra omgången efter beslutssammanträdet i oktober.
+Första omgången
+
+Redan i första ansökningsomgången ska projektledaren informera prefekt eller motsvarande om att medel söks hos RJ.
+
+Sammanfattningen ska skrivas på svenska och engelska och får omfatta max 1 500 tecken inklusive blanksteg och ska förklara varför forskningsuppgiften är viktig, dess syfte samt hur den ska genomföras. Den ska formuleras så att en intresserad allmänhet kan förstå. Om ansökan beviljas publiceras sammanfattningarna direkt på RJ:s webbplats.
+
+Projektbeskrivningen får omfatta max 9 600 tecken inklusive blanksteg, skrivas på engelska eller svenska och redovisa:
+
+    forskningsfrågan
+    syftet
+    teori och metod
+    projektplan och motiveringar till projekttiden
+    bidrag till den internationella forskningsfronten
+    forskningsområdets internationellt viktigaste arbeten
+    forskarens/forskarnas funktion i projektet samt relevanta kompetenser och meriter
+    nuvarande anställningsförhållanden för all forskande personal
+    resursbehov (löner och drift) samt arbetstid för icke-forskande personal som specificeras och motiveras
+
+Budgeten
+
+    Löner, LKP, drift samt arbetstid för icke-forskande personal ska specificeras. Uppge däremot inte indirekta kostnader och lokalkostnader.
+    Namnge all forskande personal. Lista dem som projektdeltagare med månadslön, LKP och arbetstid inom projektet.
+    Ange 0 kronor för projektdeltagare som inte avlönas inom projektet.
+    Redovisa även arbetstid och lönekostnader för eventuell icke-forskande personal, såsom assistenter och teknisk personal som Drift, men namnge dem inte.
+    Till varje beviljat projekt adderas ett bidrag till indirekta kostnader och lokalkostnader enligt den modell som RJ tillämpar.
+    Till varje projektanslag beviljar RJ även ett internationaliseringsbidrag. Bidraget kan användas för forskningsvistelser utomlands, inbjudan av utländska forskarkolleger, såväl nationella som internationella konferensresor och språkgranskning av manus på främmande språk. Ta därför inte upp dessa kostnader i din ansökan.
+    Till varje projektanslag beviljar RJ även ett bidrag till publicering med open access. Inte heller dessa kostnader ska därför tas upp i ansökan.
+
+Ospecificerade eller omotiverade kostnader beviljas inte.
+
+
+Sök bidrag till konferenser, workshops och nätverk som du själv vill arrangera via stödformen Forskningsinitiering.
+
+Approximately 6,500 mutually unintellible languages constitute our
+record of linguistic diversity
+\citep{h:Hammarstrom:Ethnologue:161718}. Languages are equal witnesses
+--- where e.g., English is but one --- to the variation and
+constraints of the unique communication system of our species,
+\citep{typ:EvansLevinson:Universals}. They hoard information
+information on what happens to language given tens of thousands of
+millenia of diversification, under all imaginable circumstances of
+human interaction. As such they may be used to investigate theories
+that may otherwise not be testable with anything less than a
+laboratory the size of human history.
+
+
