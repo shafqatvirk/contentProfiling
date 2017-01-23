@@ -8,22 +8,14 @@ def neighbourhood(s, alpha = [chr(i) for i in range(ord('a'), ord('z')+1)], alph
 def ocrc(s, gensimmodel, n = 1):
     ns = neighbourhood(s, n = n)
     ss = {n: gensimmodel.similarity(s, n) for n in ns if gensimmodel.vocab.has_key(n) and gensimmodel.vocab[s].count > gensimmodel.vocab[n].count}
-    ranrank = len(model.vocab)/(len(ns)+1)
+    ranrank = len(gensimmodel.vocab)/(len(ns)+1)
     ransim = gensimmodel.similar_by_word(s, topn=ranrank)
     rant = ransim[-1][-1]
     return {w: v for (w, v) in ss.iteritems() if v > rant}
 
-#1/2    = 1
-#2/3    = 2
-#3/4    = 3
-#4/5    = 4
-#20/21  = 20    
-
-
 def ocr_correct(gensimmodel, n = 1):
-    ws = list(sorted(gensimmodel.vocab, key = lambda x: gensimmodel.vocab[x].count, reverse=True)) #[:1000]
     done = {}
-    for w in ws:
+    for w in gensimmodel.vocab.iterkeys():
         if not done.has_key(w):
             done[w] = ocrc(w, gensimmodel, n = n)
             for (rw, _) in done[w].iteritems():
@@ -32,24 +24,17 @@ def ocr_correct(gensimmodel, n = 1):
             #print w, done[w]
     return done
 
-def fd(xs):
-    d = {}
-    for x in xs:
-        d[x] = d.get(x, 0) + 1
-    return d
+def stopword_filter(rf, gensimmodel):
+    rfo = {w: xws for (w, xws) in rf.iteritems() if type(xws) == type({}) and len(xws) > 0}
+    erdf = [(gensimmodel.vocab[xw].count, gensimmodel.vocab[w].count + gensimmodel.vocab[xw].count) for (w, xws) in rfo.iteritems() for (xw, v) in xws.iteritems()]
+    fr = sum([fxw for (fxw, fa) in erdf])/float(sum([fa for (fxw, fa) in erdf]))
 
-def df(x, y):
-    i = min([i for i in range(len(x)) if x[i] != y[i]] + [len(x)-1])
-    return (x[i], y[i:len(y)-len(x)+i+1])
-
-def transitions(done):
-    return grp2([(df(w, xw), (w, xw)) for (w, rws) in done.iteritems() if type(rws) == type({}) for xw in rws.iterkeys()])
-
+    r = {w: {xw: v for (xw, v) in xws.iteritems() if ((gensimmodel.vocab[xw].count/float(gensimmodel.vocab[w].count+gensimmodel.vocab[xw].count))/v) < fr} for (w, xws) in rfo.iteritems()}
+    return {k: v for (k, v) in r.iteritems() if v}
 
 import gensim
 
-model = gensim.models.Word2Vec.load("tgw2v.pkl")
-print "SOV", ocrc("SOV", model)
-print "man", ocrc("man", model)
-    
-r = ocr_correct(model, n = 2)
+model = gensim.models.Word2Vec.load("tgw2v50.pkl")
+rf = ocr_correct(model, n = 1)
+r = stopword_filter(rf, model)
+ocrerror_to_correction = {xw: w for (w, xws) in r.iteritems() for (xw, v) in xws.iteritems()}

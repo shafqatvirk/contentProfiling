@@ -46,6 +46,7 @@
 % For tracking purposes - this is V2.0 - May 2012
 
 \documentclass{sig-alternate}
+\usepackage{url}
 
 \begin{document}
 %
@@ -98,25 +99,31 @@
 % e-mail address with \email.
 %
 % 1st. author
+%%\alignauthor
+%%Harald Hammarstr\"om\\
+%%       \affaddr{Department of Linguistics and Philology}\\
+%%       \affaddr{Uppsala University}\\
+%%       \affaddr{Sweden}\\
+%%       \email{harald.hammarstrom@gmail.com}
+%%% 2nd. author
+%%\alignauthor
+%%Shafqat Virk\\
+%%       \affaddr{Spr\aa{}kbanken}\\
+%%       \affaddr{Gothenburg University}\\
+%%       \affaddr{Sweden}\\
+%%       \email{shafqat.virk@svenska.gu.se}
+%%% 3rd. author
+%%\alignauthor Markus Forsberg\\
+%%       \affaddr{Spr\aa{}kbanken}\\
+%%       \affaddr{Gothenburg University}\\
+%%       \affaddr{Sweden}\\
+  %%       \email{markus.forsberg@svenska.gu.se}
 \alignauthor
-Harald Hammarstr\"om\\
-       \affaddr{Department of Linguistics and Philology}\\
-       \affaddr{Uppsala University}\\
-       \affaddr{Sweden}\\
-       \email{harald.hammarstrom@gmail.com}
-% 2nd. author
-\alignauthor
-Shafqat Virk\\
-       \affaddr{Spr\aa{}kbanken}\\
-       \affaddr{Gothenburg University}\\
-       \affaddr{Sweden}\\
-       \email{shafqat.virk@svenska.gu.se}
-% 3rd. author
-\alignauthor Markus Forsberg\\
-       \affaddr{Spr\aa{}kbanken}\\
-       \affaddr{Gothenburg University}\\
-       \affaddr{Sweden}\\
-       \email{markus.forsberg@svenska.gu.se}
+Anonymous Author(s)\\
+       \affaddr{Anonymous Affiliation Row 1}\\
+       \affaddr{Anonymous Affiliation Row 2}\\
+       \affaddr{Anonymous Country}\\
+       \email{some@email.address.com}  
 }
 
 % Just remember to make sure that the TOTAL number of authors
@@ -125,17 +132,20 @@ Shafqat Virk\\
 
 \maketitle
 \begin{abstract}
-  Simpel
-  OCR post-correction, or more generally,
-
-  requires no dictionary
-
-  linear in the number
-
-  bi
-
-is applied to 
-  TODO
+  The accuracy of Optical Character Recognition (OCR) is sets the
+  limit for the success of subsequent applications used in text
+  analyzing pipeline. Recent models of OCR post-processing
+  significantly improve the quality of OCR-generated text but require
+  engineering work or resources such as human-labeled data or a
+  dictionary to perform with such accuracy on novel datasets.  In the
+  present paper we introduce a technique for OCR post-processing that
+  runs off-the-shelf with no resources or parameter tuning required.
+  In essence, words which are similar in form that are also
+  distributionally more similar than expected at random are deemed
+  OCR-variants. As such it can be applied to any language or genre (as
+  long as the orthography segments the language at the word-level).
+  The algorithm is illustrated and evaluated using a multilingual
+  document collection and a benchmark English dataset.
 \end{abstract}
 
 % A category with the (minimum) three required fields
@@ -170,7 +180,8 @@ parameters. However, for many practical applications, especially when
 it comes to multilingual and/or genre-specific text collections, such
 resources are expensive to produce or cannot be obtained at all.  For
 these applications, a slim, language-independent, off-the-shelf
-solution is more attractive and this motivates the present approach.
+solution is more attractive. This is the motivatation for the present
+approach.
 
 Given only raw-text data, distributional similarity (e.g., via
 Word2Vec) as well as form similarity (e.g., edit distance) between
@@ -179,13 +190,16 @@ post-correction algorithm based simply on juxtaposing these two
 measures: two words are variants of each other if their distributional
 similarity exceeds that expected by chance from their form
 similairity. The algorithm uses no language-specific information, runs
-in linear time and requires no thresholds or parameters to be set
-(unless parameters are used to obtain the form and/or distributional
+in quadratic time and requires no thresholds or parameters (unless
+such are used to obtain the form and/or distributional
 similarity).
 
-TODO experiment data + evaluated
-
-
+The present paper first summarizes the state-of-the-art in OCR
+post-correction in Section \ref{related}. The poor man's OCR
+correction algorithm is described and exemplified in Section
+\ref{poorman}. Experiments and evaluation are detailed in Section
+\ref{expeval}, followed by a discussion of strengths, weaknesses and
+possible enhancements of the present approach in Section \ref{disc}.
 
 
 %As such, OCR 
@@ -197,6 +211,7 @@ TODO experiment data + evaluated
 
 
 \section{Related Work}
+\label{related}
 Algorithms applicable to the OCR post-correction problem were
 developed as early as \cite{ocr:Damerau}, though the target was the
 similar problem of spelling correction rather than OCR correction per
@@ -204,20 +219,21 @@ se. A concise survey of trends in subsequent work can be found in
 \cite[6-13]{ocr:Niklas} \cite[1347-1348]{ocr:Reffle} and need not be
 repeated here; instead we summarize the current state-of-the-art. OCR
 post-correction systems suggest corrections based on form similarity
-to a more frequent word, and if a dictionary of correct forms is
+to a more frequent word, and, if a dictionary of correct forms is
 available, positive use can be made of it \cite{ocr:Eger}. Pairs of
-words with a given edit distance can be found in an efficient,
-sub-quadratic, running time \cite{ocr:Reynaert:Corpus-Clean}. A
-number of features based on form, frequency and dictionary properties
-may be used to rank candidates \cite{ocr:Evershed}. Most systems use
-labeled training data and treat the task of ranking candidates as a
-standard supervised machine learning problem \cite{ocr:Reffle,ocr:Mei}
-though \cite{ocr:Afli,ocr:AfliWay} treat it as an SMT problem and
-thereby make some use of context. A few systems use context explicitly
-\cite{ocr:Tong} and the work in the present paper can be said to
-continue this line. However, none the systems so far described can be
-run off-the-shelf; some resources or human interaction is required to
-produce corrected OCR. The systems covered in
+words with a given edit distance can be found efficiently, in
+sub-quadratic running time
+\cite{ocr:Reynaert:Corpus-Clean,cs:Boytsov}. A number of features
+based on form, frequency and dictionary properties may be used to rank
+candidates \cite{ocr:Evershed}. Most systems use labeled training data
+and treat the task of ranking candidates as a standard supervised
+Machine Learning problem \cite{ocr:Reffle,ocr:Mei} though
+\cite{ocr:Afli,ocr:AfliWay} treat it as an SMT problem and thereby
+make some use of context. A few systems use context explicitly
+\cite{ocr:Tong,ocr:Evershed} and the work in the present paper can be
+said to continue this line. However, none the systems so far described
+can be run off-the-shelf; some resources or human interaction is
+required to produce corrected OCR output. The systems covered in
 \cite{ocr:Afli,ocr:AfliWay,ocr:Reffle,ocr:Mei,ocr:Eger} necessitate
 language-specific labeled training data, while
 \cite{ocr:Kettunen,ocr:KissosDershowitz} need a dictionary, and
@@ -228,11 +244,24 @@ additional component to choose among alternatives. \cite{ocr:Lund}
 requires several independent OCR engines and alignment of their
 output.
 
-
-TODO No standardized dataset
+Unfortunately, there appears no be no widely used gold standard
+dataset available, so the various systems cannot be straighforwardly
+compared in terms of accuracy. Given the diversity in prerequisites
+for the various systems such a comparison with not be conclusive, but
+it would at least provide some benchmark figures and a starting for
+cross-system error analysis. One suitable dataset (used in the present
+paper) is the OCRed newspaper text in English from the Sydney Morning
+Herald 1842-1954\footnote{Available at
+  \url{http://overproof.projectcomputing.com/datasets/} accessed 1 Jan
+  2017.} with a manually corrected subset prepared by
+\cite{ocr:Evershed}.
 
 \section{Poor Man's OCR Post-Correction}
-We start from raw text data as input.
+\label{poorman}
+We start from raw text data as input. We assume that the raw text data
+can be unproblematically tokenized into words. For the experiments and
+examples reported here we have tokenized on whitespace recognizing
+(unicode-)alphanumeric sequences as words.
 
 \begin{enumerate}
 \item From raw text data we can derive a measure of
@@ -240,14 +269,15 @@ We start from raw text data as input.
   terms $x,y$ using a small size window in (now standard) techniques
   such as Latent Semantic Indexing (LSI) \cite{cl:Deerwester} or
   Word2Vec \cite{cl:Mikolov:Words-Phrases}. The OCR-correction
-  strategy depends very little on the choice of measure for distributional
-  similarity\footnote{We have used the efficient and easily-accessible
-    implementations of LSI and Word2Vec in \cite{cl:Rehurek:Gensim}.}.
+  strategy is oblivious to the specific choice of measure for
+  distributional similarity\footnote{We have used the efficient and
+    easily-accessible implementations of LSI and Word2Vec in
+    \cite{cl:Rehurek:Gensim}.}.
 
 \item We define a form-neighbourhood function $N(x)$ that gives the
   set of forms close to $x$. The exact choice of neighbourhood
   function depends on ambition, but the natural choice for is the set
-  of forms with edit distance $\leq 1$ to $x$: $N(x) = \{y|ED(x,y)
+  of forms with edit distance (ED) $\leq 1$ to $x$: $N(x) = \{y|ED(x,y)
   \leq 1\}$.
 
 \item Now we may define the key criterion $V(x,y)$ which assesses
@@ -255,42 +285,80 @@ We start from raw text data as input.
   variant) of $x$. Fixing on a specific $x$ let $Sim_x(y) = S(x, y)$
   be the list of similarity values $x$ has to all other terms and let
   $Sim_x(y)[k]$ denote the $k$th highest value. $V(x,y)$ is rendered
-  true iff $S(x,y)$ exceeds that expected by chance from $|N(y)|$
-  trials from $Sim_x(y)$. In other words, suppose we selected $|N(y)|$
-  values randomly from $Sim_x(y)$ (the similarity $x$ has to all other
-  terms), if the actual similarity $S(x, y)$ of $y$ to $x$ exceeds all
-  of those, then (and only then) $y$ is deemed an OCR variant of
-  $x$. The expectation when choosing $k$ items from a list of $n$
-  total items is that the maximum of the $k$ values is at the $k+1$th
-  quantile. For our purposes then, we need to check if $S(x, y)$ is in
-  the $|N(y)|+1$th quantile of $Sim_x(y)$.  We thus define $V(x,y) =
-  S(x, y) > Sim_x(y)[\frac{|N(y)|}{|N(y)|+1} \cdot |Sim_x(y)|]$.
+  true iff $S(x,y)$ exceeds that expected by chance from $|N(x)|$
+  trials from $Sim_x(y)$. In other words, suppose we selected $|N(x)|$
+  values randomly from $Sim_x(y)$ (the similarity that $x$ has to all
+  other terms), if the actual similarity $S(x, y)$ of $y$ to $x$
+  exceeds all of those, then (and only then) $y$ is deemed an OCR
+  variant of $x$. The expectation when choosing $k$ items from a list
+  of $n$ total items is that the maximum of the $k$ values is at the
+  $k+1$th quantile. For our purposes then, we need to check if $S(x,
+  y)$ is in the $|N(x)|+1$th quantile of $Sim_x(y)$.  We thus define
+  $V(x,y) = S(x, y) > Sim_x(y)[\frac{1}{|N(x)|+1} \cdot
+    |Sim_x(y)|]$.
 
 \item Finding all variants for all terms in the input can now simply
-  be done by computing $V(x, y)$ for all $x, y \in N(x)$. 
-  Each outcome equivalence class of variants is then normalized
-  (``corrected'') to its most frequent term.
+  be done by computing $V(x, y)$ for each $x$ and its form associates
+  $y \in N(x)$.  Each outcome equivalence class of variants may then
+  be normalized (``corrected'') to its most frequent term.
 
-\end{enumerate}
+\item The $V(x, y)$ answers would be sufficient if it were not for a
+  complication: the existence of high-frequency\footnote{Minimal pairs
+    where one or both members are of low-frequency are unlikely to
+    occur and do little harm when they do.} minimal pairs that are
+  somewhat distributionally similar. Naturally, a language may have
+  forms that are minimal pairs, and it may be that both members in a
+  pair are frequent and some such pairs happen to achieve significant
+  distributional similarity. For example, in English, 'in' and 'on' is
+  a minimal pair with both members frequent and distributionally
+  similar. The strategy described so far would identify the less
+  frequent of the two as an OCR variant of the more frequent one,
+  which is a false positive with dire consequences on the token
+  level. Most OCR post-correction systems use a dictionary or
+  frequency threshold that would whitelist such cases
+  unproblematically.  However, in our strive not to rely on such
+  resources, the following strategy allows us to distinguish minimal
+  pairs form OCR-errors heuristically. If a form $y$ is really an OCR
+  error of $x$, we expect the frequency of $y$ (denoted $f(y)$ to
+  derive from the frequency of its patron $x$ by an error rate
+  $r$. The appropriate error rate $r$ cannot be known beforehand as it
+  depends on dataset specifics such as the quality of scanned
+  originals. But the OCR error identifications of $V(x, y)$ allow us
+  to at least estimate $r_V$ an upper bound on $r$ for the specific
+  dataset at hand. If $x, y$ are the set of pairs for which $V(x, y)$
+  is true, the estimate may be formulated as $r_V = \frac{\sum
+    f(y)}{\sum f(x) + \sum f(y)}$. $V(x, y)$ contains the true OCR
+  errors along with the minimal pairs so it constitutes an
+  overestimate of the error rate $r$. Now, if an individual pair in
+  $V(x, y)$ manifests an even higher error rate than this, it is
+  probably safer to regard them as a minimal pair.  If we additionally
+  scale the estimate of the error rate of a potential minimal pair by
+  the distributional similarity (pushing distributionally unsimilar
+  pairs not to be regarded as OCR errors) we arrive at the following
+  formula for filtering $V(x, y)$: $O(x, y) = \frac{f(y)}{f(x) +
+    f(y)}/S(x, y) < r_V$.
+  \end{enumerate}
 
 The procedure may be iterated, whereby variants identified in the OCR
 post-correction are conflated and re-fed to the distributional
 similarity calculation, which in turn may suggest new OCR variants,
-until convergence (TODO cf.). Especially if the neighbourhood function
-is conservatively bound to edit distance 1, iteration is the only way
-to achieve OCR postcorrection involving more than one character per
+until convergence (cf. a similar set-up in \cite[1351]{ocr:Reffle},
+where convergence is said to be reached after only a handful of
+iterations). Especially if the neighbourhood function is
+conservatively bound to edit distance 1, iteration is the only way to
+achieve OCR post-correction involving more than one character per
 term.
 
 We will now illustrate the procedure with an example from the dataset
-used for experiments (see below for details).
+(see below for details) used for experiments .
 
 \begin{enumerate}
-\item We run Word2Vec with the default settings\footnote{For the record, the default settings are CBOW with mean training method, vector dimensionality 100, learning rate 0.025, word window size 5, minimal frequency 5, threshold for random downsampling of higher-frequency words 1e-3, number of noise words word for negative sampling 5, number of epochs 5, batch size 10000.} to get a vector space representation for each term. As an exmaple, the ten terms most similar to
+\item We run Word2Vec with the default settings\footnote{For the record, the default settings are CBOW with mean training method, vector dimensionality 100, learning rate 0.025, word window size 5, minimal frequency 5, threshold for random downsampling of higher-frequency words 1e-3, number of noise words word for negative sampling 5, number of epochs 5, batch size 10000.} to get a vector space representation for each term. As an example, the ten terms most similar to
 'language' is shown below.
 
-  \begin{tabular}{l|r r}
-    Rank & $y$ & $S('language', y)$\\
-1 & languages & 0.7619\\\hline
+  \begin{tabular}{l|l|r}
+    Rank & $y$ & $S(language, y)$\\ \hline
+1 & languages & 0.7619\\
 2 & linguistic & 0.7555\\
 3 & dialect & 0.7381\\
 4 & community & 0.7074\\
@@ -302,7 +370,10 @@ used for experiments (see below for details).
 10 & literature & 0.6482\\
 \end{tabular}
 
-\item As a neighbourhood function, we choose all the one-character substitutions with letters from the English lowercase alphabet ($\Sigma$). Consider then the word 'language', $N(language) = {aanguage, banguage, \ldots{}, language, lbnguage, \ldots{}}$ contains $|language| \cdot \Sigma 8 \cdot 26 = 208$ forms.
+\item As a neighbourhood function, we choose all the one-character
+  substitutions with letters from the English lowercase alphabet
+  ($\Sigma$). Consider then the term 'language', $N(language) = \{aanguage, banguage$, \ldots{},\\ $language, lbnguage$, $\ldots{}\}$
+  contains $|language| \cdot \Sigma = 8 \cdot 26 = 208$ forms.
 
 \item Which of these 208 forms have a higher than expected
   distributional similarity $S(language, y)$ to 'language'? The total
@@ -311,61 +382,282 @@ used for experiments (see below for details).
   976$th quantile. The $976$th highest value of $Sim_{language}(y)$,
   i.e., $Sim_{language}(y)[976]$ is $0.3839$. 7 of the members of $N(language)$
   (apart from the term 'language' itself) have a distributional similarity
-  to 'language' higher than this:
+  to 'language' higher than this (Table \ref{language}).
 
-  \begin{tabular}{l|r r}
-  $y$ & $Sim(language, y)$ & frequency of $y$\\ \hline
-ianguage & 0.5346 & 387\\
-languagc & 0.4644 & 225\\
-languaqe & 0.4229 & 93\\
-languuge & 0.4187 & 68\\
-languago & 0.4077 & 135\\
-lauguage & 0.4003 & 77\\
-lunguage & 0.3831 & 63\\
+  \begin{table}
+\centering
+\caption{Terms for which $O(x, y)$ is true where is $x$ is the term
+  'language', i.e., terms deemed OCR variants of 'language'.}
+\label{language}
+  \begin{tabular}{l|l|r|l|l}
+    $y$ & $Sim(x, y)$ & $f(y)$ & $\frac{f(y)}{f(x)+f(y)}$ & $\frac{f(y)}{f(x)+f(y)} / S(x, y)$\\ \hline
+ianguage & 0.52356 & 387 & 0.00066 & 0.00125\\
+languagc & 0.50100 & 225 & 0.00038 & 0.00076\\
+languaqe & 0.44455 & 93 & 0.00016  & 0.00035\\
+languuge & 0.29799 & 68 & 0.00012  & 0.00038\\
+languago & 0.37767 & 135 & 0.00023 & 0.00060\\
+lauguage & 0.34320 & 77 & 0.00013  & 0.00038\\
+lunguage & 0.46430 & 63 & 0.00011  & 0.00023\\
 \end{tabular}
+\end{table}
 
-  These are thus deemed OCR errors to be corrected to 'language'
-  whose frequency (581 815) is far higher.
+  \begin{table}
+\centering
+\caption{Terms for which $O(x, y)$ is true vs not true (boldfaced)
+  where is $x$ is the term 'they'. The non-boldfaced terms are
+  deemed OCR variants of 'they'.}
+\label{they}
+  \begin{tabular}{l|l|r|l|l}
+    $y$ & $Sim(x, y)$ & $f(y)$ & $\frac{f(y)}{f(x)+f(y)}$ & $\frac{f(y)}{f(x)+f(y)} / S(x, y)$\\
+  \hline
+then & 0.51802 & 411360 & 0.25513 & {\bf 0.49250}\\
+them & 0.70800 & 378516 & 0.23964 & {\bf 0.33847}\\
+thcy & 0.32272 & 1256 & 0.00104 & 0.00323\\
+thoy & 0.42350 & 1760 & 0.00146 & 0.00345\\
+thej & 0.29713 & 292 & 0.00024 & 0.00081\\
+theg & 0.33179 & 143 & 0.00012 & 0.00035\\
+ihey & 0.42526 & 882 & 0.00073 & 0.00172\\
+thev & 0.43283 & 822 & 0.00068 & 0.00158\\
+tney & 0.29813 & 174 & 0.00014 & 0.00048\\
+tbey & 0.39003 & 1210 & 0.00101 & 0.00258\\
+fhey & 0.35574 & 129 & 0.00011 & 0.00030\\
+\end{tabular}
+\end{table}
+  
+\item Are any of the terms in Table \ref{language} minimal pairs with
+  'language'?  The the upper bound estimate of the error rate for all
+  pairs in $V(x, y)$ in this test set is $r_V =
+  \frac{458626300}{2714497206} \approx 0.16895$. Significant for the
+  terms in question is that the frequency $f(language)$ is very high,
+  at 581 815, yielding much lower error rates, so none of them is
+  judged a minimal pair. Thus, these are deemed OCR errors to be
+  corrected to 'language'. As a comparison, we also show the
+  corresponding calculation for the term 'they' in Table \ref{they}.
+  In this case, two of the potential OCR-variants 'then' and 'them'
+  have such high frequencies that it is unlikely that their
+  frequencies are derived from 'they' with a realistic error rate, and
+  so the calculations reject them as being OCR-variants.
  \end{enumerate}
 
 \section{Experiments}
+\label{expeval}
+The basis for the experiments is a collection of over 9 000 raw text
+grammatical descriptions digitally available for computational
+processing. The collection consists of (1) out-of-copyright texts
+digitized by national libraries, archives, scientific societies and
+other similar entities, and (2) texts posted online with a license to
+use for research usually by university libraries and non-profit
+organizations (notably the Summer Institute of Linguistics). The
+collection is thus of the specific genre that whereby one language
+(the target-language) is given a human-readable grammatical
+description in another language (the meta-language). For each
+document, we know the meta-language it is written in (usually English,
+French, German, Spanish or Mandarin Chinese), the target-language(s)
+described in it (one of the thousands of minority languages throught
+the world) and the type of description (comparative study, description
+of a specific features, phonological description, grammar sketch, full
+grammar etc). The collection can be enumerated using the
+bibliographical- and metadata is contained in the open-access
+bibliography of descriptive language data at \url{glottolog.org}. The
+collection spans as many as 96 meta-languages and 4 005
+target-languages and we intend use it for automated
+data-harvesting/profiling of the 4 000 target-languages. The entire
+collection has been OCRed using different, not individually recorded,
+OCR engines (mostly various versions of ABBYY Finereader usually set
+to recognize based on the meta-language) and contains large amounts of
+OCR errors due to the varying quality and age of the originals.
 
-Dataset spans 
+For experiments on OCR post-correction, we have used the documents
+written in a (meta-)language with more than 100 documents worth of
+data. The sizes of the subparts of the collection corresponding to
+these meta-languages are given in Table \ref{collsize}.  Mandarin
+Chinese is excluded as the script does not natively render
+word-boundaries, which is a prerequisite for the techniques described
+in this paper.
+
+\begin{table}
+\centering
+\caption{Sizes of datasets used in the experiments.}
+\label{collsize}
+\begin{tabular}{l|l|r|r|r}
+Meta-language & & \# Doc:s & \# Types & \# Tokens\\ \hline
+English & eng & 23 708 & 23 114 708 & 380 467 360\\
+French & fra & 3 452 & 3 585 529 & 86 699 512\\
+German & deu & 2 753 & 2 830 285 & 38 643 792\\
+Spanish & spa & 2 484 & 2 490 063 & 84 925 065\\
+Portuguese & por & 1 076 & 716078 & 14 420 655\\
+Russian & rus & 677 & 293909 & 50 387 961\\
+Dutch & nld & 528 & 397564 & 5 849 144\\
+Italian & ita & 329 & 555043 & 6 058 028\\
+Indonesian & ind & 206 & 166524 & 2 163 114\\
+\end{tabular}
+\end{table}
+
+For maximal simplicity, we apply the poor man's OCR correction
+algorithm with one-character substitution ($N(x) = \{y|ED(x,y) \leq
+1\}$) over one iteration. As we do not have gold standard data on the
+languages involved (for English, see below), we gauge the
+effectiveness simply by observing the proportion of terms corrected,
+as shown in Table \ref{typered}. The resulting number of OCR
+corrections are proportional to vocabulary size but do not otherwise
+show great variation across languages, suggesting that the method is
+indeed independent of language. The anomalously low result for Russian
+was checked and is largely due to what must be erroneous character
+settings for the OCR of a fair share of documents, resulting in
+roman-script junk rather than actual Cyrillic OCR errors. The datasets
+have other differences than language per se, i.e., bias towards a
+certain era, quality of originals and OCR engine performance, so a
+more detailed study of cross-linguistic differences in OCR correction
+performance is not straightforward.
+
+\begin{table}
+\centering
+\caption{Type reduction after OCR post-correction}
+\label{typered}
+\begin{tabular}{l|l|r|r|r}
+              & & \multicolumn{2}{|c|}{\# Types}\\
+Meta-language & & Before & After & Reduction\\ \hline
+English & eng & 23 114 708 & 21 681 596 & 6.2\%\\
+French & fra & 3 585 529 & 3 399 081 & 5.2\%\\
+German & deu & 2 830 285 & 2 742 546 & 3.1\%\\
+Spanish & spa & 2 490 063 & 2 373 030 & 4.7\%\\
+Portuguese & por & 716 078 & 707 583 & 1.2\%\\
+Russian & rus & 293 909 & 539 & 0.2\%\\
+Dutch & nld & 397 564 & 394 171 & 0.9\%\\
+Italian & ita & 555 043 & 550 359 & 0.8\%\\
+Indonesian & ind & 166 524 & 164 524 & 1.2\%\\
+\end{tabular}
+\end{table}
+
+As a rigourous evaluation of accuracy and as a benchmark to compare
+with other methods, the poor man's OCR correction algorithm was
+applied to the freely available gold standard test set used by
+\cite{ocr:Evershed}.  It consists of OCRed newspaper text in English
+from the Sydney Morning Herald 1842-1954\footnote{Available at
+  \url{http://overproof.projectcomputing.com/datasets/} accessed 1 Jan
+  2017.} (called dataset 1) with random sampled manually corrected
+subset (called dataset 2). The full collection of texts consists of
+928 170 types / 10 498 979 tokens which we use for ``training'', i.e.,
+to calculate $O(x, y)$ for all types. The gold standard subset
+consists of 11650 types / 38226 tokens. Again, for maximal
+transparency we apply one-character OCR post-correction over one
+iteration. The results are shown in Table \ref{eval}, yielding a
+modest improvement in Word Error Rate from 85.5\% to 86.5\%. This is
+significantly lower than the 93.7\% achieved by
+\cite{ocr:Evershed}. However, the latter system has a large number of
+thresholds and requires resources, such as google n-grams, beyond the
+training set itself. The present system runs off the shelf with
+no tuning or other intervention required. Furthermore, the bulk of
+the hypercorrections are in fact morphological variants (the majority
+being participle versus past tense in verbs forms) which are not
+harmful in many information retrieval applications. More important
+are the number of OCR-errors not corrected. Here, a fair share of
+the erroneous types (2103/3995) are more than one character away from
+their correct form which by definition cannot be corrected in present
+approach in one iteration.
+
+\begin{table}
+\centering
+\caption{Evaluation of poor man's OCR post-correction on the Sydney Morning Herald 1842-1954 dataset 2.}
+\label{eval}
+\begin{tabular}{l|r r|l r r}
+          & \multicolumn{2}{c}{Dataset 2} & \multicolumn{3}{c}{After OCR correction}\\ \hline
+          & Types & Tokens & & Types & Tokens\\
+          & 11 650 & 38 226 & & 11 650 & 38 226\\ \hline
+Correct & 7 655 & 32 714 & untouched & 7 383 & 32 225\\
+forms   &       &        & hypercorr. & 272 & 489\\
+\hline
+Erroneous & 3 995 & 5 512 & untouched & 3 152 & 4 276\\
+forms	   &       &       & corrected & 540 & 874\\
+           &       &       & adjusted & 303 & 362\\
+\end{tabular}
+\end{table}
 
 
 
 \section{Discussion}
+\label{disc}
+The running time of the poor man's OCR post-correction algorithm is
+bounded by the number of types quadratically, times the size of the
+form neighbourhood. Given a maximal word length, the algorithm is thus
+quadratic in the size of the vocabulary. The quadratic term comes from
+computing the $|N(x)|+1$th quantile of $Sim_x(y)$ for each $x$ in the
+vocabulary. The latter step can be done with time proportional to
+$|N(x)|+1$ (again, a constant given a maximal word length) times the
+size of the vocabulary, with an efficient algorithm that avoids
+complete sorting.  If a speed-up is needed, the $|N(x)|+1$th quantile
+can be computed by an approximation through sampling or a randomized
+algorithm, reducing the complexity of this step to constant or
+logarithmic. The above analysis concerns the OCR correction algorithm
+only, which presupposes a distributional similarity measure. If a non
+quadratic-time algorithm is used there, the entire approach is bounded
+by this complexity.
 
+The accuracy of the poor man's OCR post-correction algorithm is lower
+than extant approaches which make use of resources or supervision so
+its value lies in being language-independent, unsupervised
+and intervention free. However, there is a class of errors where
+the present approach outperforms general lexicon-based systems: genre specific
+terms. For example, the present collection contains abbrevations
+that are specific to the genre of grammatical descriptions, such as
+SOV (to denote that a language described has Subject-Object-Verb constituent
+order), with a common OCR variant SOY, correctly identified as such
+(in all meta-languages independently) in the present system.
 
+With a one-character neighbourhood and only one iteration the poor man's
+OCR correction method is rather conservative, not resulting in a large
+number of false positives. As mentioned, the majority of such cases
+are in fact morphological variants whose normalization is not harmful
+for many bag-of-words based tasks in information retrieval. Perhaps
+a more serious drawback is that the system requires word-boundaries
+and, in the present formulation, cannot correct OCR-errors that disrupt
+word boundaries and cannot be applied to languages whose writing systems
+do not encode word boundaries.
 
-r["cat"]
-'eat'
+The system as described is oblivious to glyphs, i.e., it does not use
+any information related to the shape of a character. It is rather
+obvious that OCR confusion is character sensitive and such information
+is often explicitly used in OCR systems, e.g., \cite[48-49]{ocr:Evershed}.
+Including such a component in the present system would be straightforward
+enhancement.
 
-cat vs can
+Like many other systems, the present algorithm corrects types, i.e.,
+strings in abstracto, rather than specific occurrences. Here also,
+there is room for improvement by considering the specific context in
+which a string occurs. The point is that a correction ay be suppressed
+dependending on the context, rather than to suggest different alternatives
+for correction (something which is still a global property).
 
+\section{Conclusions}
+Searching or extractig information from digitised text can be
+fundamentally limited by the quality of OCR text. We described a
+language and genre-independent unsupervised OCR post-correction system
+which requires no resources or human tuning. The system consistently
+improves OCR text but has a lower performance than systems which
+benefit from large training resources. The implementation (less than
+50 lines of Python code) is available from
+\url{https://github.com/shafqatvirk/contentProfiling}.
 
+%ACKNOWLEDGMENTS are optional
+\section{Acknowledgments}
+Anonymous author was supported by unnamed grant.
 
-and is thus bounded
-  by the $O(|X| \cdot k)$ where k depends not on |X| but on the
-  length. 
+%
+% The following two commands are all you need in the
+% initial runs of your .tex file to
+% produce the bibliography for the citations in your paper.
+\bibliographystyle{abbrv}
+\bibliography{ocrc,miscbooks}  % sigproc.bib is the name of the Bibliography in this case
+% You must have a proper ".bib" file
+%  and remember to run:
+% latex bibtex latex latex
+% to resolve all references
+%
+% ACM needs 'a single self-contained file'!
+%
 
-Fromanalgorithmicpointofview,ourcomputationof
-profiles canbeconsideredasaspecialformofanexpectation–
-maximizationprocedurewhereglobalandlocalprofilesare
-improvedusinganiterativemutualreinforcementprinciple.
-To guaranteeefficiencyofthecomputation, specialfinite-state
-technology hasbeendeveloped [12].
+\end{document}
 
-
-Tothebestofourknowledgethe
-first systemdirectedtowardsunsupervisedlearningisthespel-
-ling correctionsystempresentedbyChurchandGale [19]. Inthe
-beginning, alleditoperationsareassumedtobeequallyprobable.
-From alargetextcorpusallstringsareretrievedthatarenotin
-the backgroundlexiconandthatleadtoavalidwordwithone
-edit operation.Iterativelythespellingsystemrunsoverthestring
-collection andthenusesthecorrectionsmadetoupdatetheedit
-probabilities heldincharacterconfusionmatrices.
 
 
 \section{Conclusion}
@@ -448,6 +740,43 @@ User's Guide}\cite{Lamport:LaTeX}.
 You may want to display math equations in three distinct styles:
 inline, numbered or non-numbered display.  Each of
 the three are discussed in the next sections.
+
+
+%APPENDICES are optional
+%\balancecolumns
+\appendix
+%Appendix A
+\section{Headings in Appendices}
+The rules about hierarchical headings discussed above for
+the body of the article are different in the appendices.
+In the \textbf{appendix} environment, the command
+\textbf{section} is used to
+indicate the start of each Appendix, with alphabetic order
+designation (i.e. the first is A, the second B, etc.) and
+a title (if you include one).  So, if you need
+hierarchical structure
+\textit{within} an Appendix, start with \textbf{subsection} as the
+highest level. Here is an outline of the body of this
+document in Appendix-appropriate form:
+\subsection{Introduction}
+\subsection{The Body of the Paper}
+\subsubsection{Type Changes and  Special Characters}
+\subsubsection{Math Equations}
+\paragraph{Inline (In-text) Equations}
+\paragraph{Display Equations}
+\subsubsection{Citations}
+\subsubsection{Tables}
+\subsubsection{Figures}
+\subsubsection{Theorem-like Constructs}
+\subsubsection*{A Caveat for the \TeX\ Expert}
+\subsection{Conclusions}
+\subsection{Acknowledgments}
+\subsection{Additional Authors}
+This section is inserted by \LaTeX; you do not insert it.
+You just add the names and information in the
+\texttt{{\char'134}additionalauthors} command at the start
+of the document.
+
 
 \subsubsection{Inline (In-text) Equations}
 A formula that appears in the running text is called an
@@ -693,74 +1022,3 @@ to create camera-ready copy, but may be converted
 to other forms -- e.g. HTML. If you inadvertently omit
 some or all of the \texttt{{\char'134}def}s recompilation will
 be, to say the least, problematic.
-
-\section{Conclusions}
-This paragraph will end the body of this sample document.
-Remember that you might still have Acknowledgments or
-Appendices; brief samples of these
-follow.  There is still the Bibliography to deal with; and
-we will make a disclaimer about that here: with the exception
-of the reference to the \LaTeX\ book, the citations in
-this paper are to articles which have nothing to
-do with the present subject and are used as
-examples only.
-%\end{document}  % This is where a 'short' article might terminate
-
-%ACKNOWLEDGMENTS are optional
-\section{Acknowledgments}
-This section is optional; it is a location for you
-to acknowledge grants, funding, editing assistance and
-what have you.  In the present case, for example, the
-authors would like to thank Gerald Murray of ACM for
-his help in codifying this \textit{Author's Guide}
-and the \textbf{.cls} and \textbf{.tex} files that it describes.
-
-%
-% The following two commands are all you need in the
-% initial runs of your .tex file to
-% produce the bibliography for the citations in your paper.
-\bibliographystyle{abbrv}
-\bibliography{ocrc}  % sigproc.bib is the name of the Bibliography in this case
-% You must have a proper ".bib" file
-%  and remember to run:
-% latex bibtex latex latex
-% to resolve all references
-%
-% ACM needs 'a single self-contained file'!
-%
-%APPENDICES are optional
-%\balancecolumns
-\appendix
-%Appendix A
-\section{Headings in Appendices}
-The rules about hierarchical headings discussed above for
-the body of the article are different in the appendices.
-In the \textbf{appendix} environment, the command
-\textbf{section} is used to
-indicate the start of each Appendix, with alphabetic order
-designation (i.e. the first is A, the second B, etc.) and
-a title (if you include one).  So, if you need
-hierarchical structure
-\textit{within} an Appendix, start with \textbf{subsection} as the
-highest level. Here is an outline of the body of this
-document in Appendix-appropriate form:
-\subsection{Introduction}
-\subsection{The Body of the Paper}
-\subsubsection{Type Changes and  Special Characters}
-\subsubsection{Math Equations}
-\paragraph{Inline (In-text) Equations}
-\paragraph{Display Equations}
-\subsubsection{Citations}
-\subsubsection{Tables}
-\subsubsection{Figures}
-\subsubsection{Theorem-like Constructs}
-\subsubsection*{A Caveat for the \TeX\ Expert}
-\subsection{Conclusions}
-\subsection{Acknowledgments}
-\subsection{Additional Authors}
-This section is inserted by \LaTeX; you do not insert it.
-You just add the names and information in the
-\texttt{{\char'134}additionalauthors} command at the start
-of the document.
-
-\end{document}
