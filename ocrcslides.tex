@@ -1,0 +1,537 @@
+\documentclass{beamer}
+\usepackage[T3,T1]{fontenc}
+\usepackage[noenc]{tipa}
+\usepackage[authoryear,round,comma,sort]{natbib}
+\usepackage{url}
+\usepackage[utf8x]{inputenc}
+\usepackage{default}
+\usepackage{color}
+\usepackage{multirow}
+\usepackage{graphicx}
+\usepackage{tikz-qtree}
+\usepackage{array}
+\usepackage[normalem]{ulem}
+
+%\usetheme{Madrid}
+\usetheme{Boadilla} 
+
+
+% \usecolortheme{dove}
+
+%\definecolor{UniBlue}{RGB}{83,121,170}
+\definecolor{neonpink}{HTML}{FF6EC7}
+%\setbeamercolor{title}{fg=UniBlue}
+%\setbeamercolor{frametitle}{fg=UniBlue}
+%\setbeamercolor{structure}{fg=UniBlue}
+
+%\setbeamercolor{palette primary}{bg=red!50!black, fg=brown!50!orange} %
+%\setbeamercolor{palette secondary}{bg=red!65!black, fg=brown!10!orange}
+%\setbeamercolor{palette tertiary}{bg=red!45!black, fg=brown!10!orange}
+%\setbeamercolor{palette quaternary}{bg=red!35!black, fg=brown!10!orange}
+
+\definecolor{slate gray}{HTML}{708090}
+
+\usepackage{tikz}
+\usetikzlibrary{shapes,calc}
+
+%My predefined color
+%\definecolor{myblue}{rgb}{0.1,0.15,0.7}
+
+%Set color for Annotations
+\colorlet{annotcol}{red!80!red}
+\colorlet{annotcolgreen}{green!80!green}
+
+\newcommand\tikzmark[1]{
+  \tikz[remember picture,overlay] \coordinate (#1);
+  }
+
+%Command to add annotation above
+\newcommand{\noteup}[3][0em,0em]{
+\begin{tikzpicture}[
+  remember picture,
+  overlay]
+\node[draw=annotcol,fill=white,ellipse,very thick,minimum width=2cm] 
+  (mynode) 
+  at ([shift=($({#1})+({0em,+5.5em})$)]{#2.north})
+  {\begin{minipage}{2cm}\centering #3\end{minipage}};
+\draw[annotcol,very thick,->,>=latex]
+  (mynode.south) to[out=-90,in=+90] ([xshift=0.5em,yshift=1.3em]{#2}); 
+\end{tikzpicture}
+}
+
+%Command to add annotation below
+\newcommand{\notedown}[3][0em,0em]{
+\begin{tikzpicture}[
+  remember picture,
+  overlay]
+\node[draw=annotcolgreen,fill=white,ellipse,very thick,minimum width=2cm] 
+  (mynode) 
+  at ([shift=($({#1})+({0em,-4em})$)]{#2.south})
+  {\begin{minipage}{2cm}\centering #3\end{minipage}};
+\draw[annotcolgreen,very thick,->,>=latex]
+  (mynode.north) to[out=90,in=-90] ([xshift=0.5em,yshift=-0.1em]{#2}); 
+\end{tikzpicture}
+}
+
+\newcommand{\hcancel}[1]{%
+    \tikz[baseline=(tocancel.base)]{
+        \node[inner sep=0pt,outer sep=0pt] (tocancel) {#1};
+        \draw[line width=2pt,red] (tocancel.north west) -- (tocancel.south east);
+    }%
+}%
+
+
+\title[Poor Man's OCR Post-Correction]{Poor Man's OCR Post-Correction: Unsupervised Recognition of Variant Spelling Applied to a Multilingual Document Collection}
+
+
+\author[Hammarstrom]{Harald Hammarstr\"om\\\emph{Uppsala University}\\Shafqat Virk and Markus Forsberg\\\emph{Spr\aa{}kbanken, Gothenburg University}}
+
+\date[2017 DATeCH]{1-2 June 2017 G\"ottingen}
+
+%, Hy\`eres (France)
+
+\begin{document}
+\frame{
+\maketitle
+}
+
+
+
+\frame{
+  \frametitle{Poor Man's OCR Post-Correction: Motivation}
+
+  \begin{itemize}
+  \item We have an OCRed document collection of descriptive grammars
+    \begin{itemize}
+    \item Spans a dozens of different (meta-)languages
+    \item OCR quality quite varied
+    \item Important genre-specific terms
+    \end{itemize}
+  \item Existing OCR post-correction techniques require
+    \begin{itemize}
+    \item Resources (language-specific)
+    \item Tuning and adaptation
+    \end{itemize}
+  \item A light-weight genre- and language-independent approach needed
+    (even if not state-of-the-art accuracy for English)
+\end{itemize}
+
+}
+
+
+
+\begin{frame}[fragile]{OCR Quality Example (Though Quality Varies)}
+
+{\small
+\begin{verbatim}
+Dieses Tonmuster findet sich fast nur bei Fremdwörtern. Außerdem
+umfaßt die hier zu besprechende Gruppe m1r 16 nicht verbale
+Morpheme des untersuchten Sprachmaterials. Auf die Bedeutun& des
+Tonmus.ters [hoch-tief] für die Bildung des direkten Imperativs gewisser
+Verbalklassen wird bei der Behandlung .der Morphologie des Verbums
+nähereinzugehen sein (7.34ff.). Â·
+Â·
+Â·
+dimo
+paqa
+s~q;,
+\end{verbatim}}
+
+\includegraphics[width=.75\textwidth]{g2gocrex.png}
+
+\end{frame}
+%p 107
+
+
+\frame{
+  \frametitle{OCRed Grammar Collection}
+
+  
+  \begin{quote}
+  Spans 4 005 (target-)languages written in 96 (meta-)languages
+  \end{quote}
+
+\vspace{0.3cm}
+  
+\begin{tabular}{l|l|r|r|r|r}
+Meta-language & & \# lgs & \# Doc:s & \# Types & \# Tokens\\ \hline
+English & eng & 3098 & 23 708 & 23 114 708 & 380 467 360\\
+French & fra & 680 & 3 452 & 3 585 529 & 86 699 512\\
+German & deu & 468 & 2 753 & 2 830 285 & 38 643 792\\
+Spanish & spa & 332 & 2 484 & 2 490 063 & 84 925 065\\
+Portuguese & por & 115 & 1 076 & 716 078 & 14 420 655\\
+Russian & rus & 220 & 677 & 293 909 & 50 387 961\\
+(Mandarin & cmn & 94 & 445 & ? & ?)\\
+Dutch & nld & 74 & 528 & 397 564 & 5 849 144\\
+Italian & ita & 64 & 329 & 555 043 & 6 058 028\\
+Indonesian & ind & 70 & 206 & 166 524 & 2 163 114\\
+\ldots{} & \ldots{} & \ldots{} & \ldots{} & \ldots{} & \ldots{}\\
+\end{tabular}
+
+  \begin{quote}
+  English accounts for a larger share than all the other ones together!
+  \end{quote}
+
+}
+
+\frame{
+\frametitle{Geographical Distribution of Meta-Languages}
+
+\includegraphics[width=.95\textwidth]{g2gocr-dots.png}
+
+\vspace{0.3cm}
+
+{\scriptsize
+\begin{center}
+\begin{tabular}{|l l|l l|l l|}
+\hline
+{\color{blue} eng} & {\color{blue} blue} & {\color{purple} deu} & {\color{purple} purple} & {\color{orange} ind} & {\color{orange} orange}\\\hline
+{\color{green} fra} & {\color{green} green} & {\color{slate gray} rus} & {\color{slate gray} slate gray} & {\color{black} nld} & {\color{black} black}\\\hline
+{\color{red} spa} & {\color{red} red} & {\color{neonpink} por} & {\color{neonpink} neonpink} & {\color{magenta} ita} & {\color{magenta} magenta}\\\hline
+\end{tabular}
+\end{center}
+}
+
+}
+
+\frame{
+  \frametitle{OCR quality is a significant issue!}
+
+\begin{itemize}
+\item Probably deep-parse of the texts are is not feasible for a fair share of the documents
+
+\item OCR errors affect genre-specific highly important terms, e.g., terms distributionally similar to {\tt SOV}
+
+\begin{center}
+  \begin{tabular}{l|l}
+term & Distributional similarity to 'SOV'\\
+\hline    
+SVO & 0.96\\
+VSO & 0.90\\
+{\bf SOY} & 0.89\\
+VOS & 0.83\\
+AOV & 0.80\\
+\ldots{} & \ldots{}
+\end{tabular}
+\end{center}
+
+\item Correct OCR of terms of vernular (described) languages not feasible and not targeted
+
+\end{itemize}
+
+}
+ 
+\frame{
+\frametitle{OCR Post-Correction State-of-the-Art}
+
+\begin{itemize}
+\item Similar to spelling correction, going back to \citet{ocr:Damerau}
+
+  \begin{quote}
+Correct an out-of-dictionary word to a dictionary word that is similar in form
+\citep{ocr:Eger}
+  \end{quote}
+
+%  OCR
+%post-correction systems suggest corrections based on form similarity
+%to a more frequent word, and, if a dictionary of correct forms is
+%available, positive use can be made of it \cite{ocr:Eger}.
+
+
+%Pairs of
+%words with a given edit distance can be found efficiently, in
+%sub-quadratic running time
+%\cite{ocr:Reynaert:Corpus-Clean,cs:Boytsov}.
+
+\item Features based on form, frequency and dictionary properties used
+  to rank candidates \citep{ocr:Evershed}
+  
+\item Most systems use labeled training data and handle it as a
+  regular supervised Machine Learning problem
+  \citep{ocr:Reffle,ocr:Mei,ocr:Silfverberg}
+  
+\begin{itemize}
+\item Though \citet{ocr:Afli,ocr:AfliWay} treat it as an SMT problem (thereby making some use of context)
+\end{itemize}
+  
+\item A few systems use context explicitly
+  \citep{ocr:Tong,ocr:Evershed}
+\end{itemize}
+
+\begin{quote}
+  All systems rely on a {\bf dictionary} of correct forms and/or {\bf threshold} tuning
+\end{quote}
+}
+
+
+
+%However, none the systems so far described
+%can be run off-the-shelf; some resources or human interaction is
+%required to produce corrected OCR output. The systems covered in
+%\cite{ocr:Afli,ocr:AfliWay,ocr:Reffle,ocr:Mei,ocr:Eger} necessitate
+%language-specific labeled training data, while
+%\cite{ocr:Kettunen,ocr:KissosDershowitz} need a dictionary, and
+%\cite{ocr:Bassil} relies on google to provide a dictionary.  The
+%approaches by \cite{ocr:Evershed,ocr:Reynaert:2016,ocr:Tong} need some
+%human intervention to set dataset-specific thresholds or some
+%additional component to choose among alternatives.
+
+\frame{
+\frametitle{Poor Man's OCR Correction: Principles}
+
+\begin{itemize}
+\item No dictionary, no labeled training data, no thresholds
+\item OCR corrects types, so requires that the orthography of the input language has word boundaries
+\end{itemize}
+
+
+\begin{enumerate}
+\item $Sim(x,y)$: From raw text data get the \emph{distributional
+  similarity} between terms $x,y$ (using a small size window in
+  Word2Vec, \citealt{cl:Mikolov:Words-Phrases})
+  
+\item $N(x) = \{y|ED(x,y) \leq 1\}$: The form-neighbourhood, giving the set of forms close to $x$
+
+\item $V(x, y)$: $y$ is an OCR variant of $x$ iff $S(x,y)$ exceeds that expected by chance from $|N(x)|$ random trials
+
+\item $V(x, y)$ would be sufficient except any language might also have true minimal pairs, so also check if the relative frequencies of $x$ vs $y$ resemble that of OCR errors rather than minimal pairs
+\end{enumerate}
+
+}
+
+
+
+\frame{
+\frametitle{Example: Distributional Similarity for 'language'}
+
+\begin{quote}
+  The term 'language' has a distributional similarity to every other of 204 002 word types
+\end{quote}
+
+{\small
+\begin{center}
+  \begin{tabular}{l|l|r}
+    Rank & $y$ & $S(language, y)$\\ \hline
+1 & languages & 0.7619\\
+2 & linguistic & 0.7555\\
+3 & dialect & 0.7381\\
+4 & community & 0.7074\\
+5 & history & 0.7036\\
+6 & culture & 0.6995\\
+7 & society & 0.6704\\
+8 & population & 0.6636\\
+9 & lexicon & 0.6542\\
+10 & literature & 0.6482\\
+\ldots{} & \ldots{} & \ldots{}\\
+100 & quiche & 0.5584\\
+\ldots{} & \ldots{} & \ldots{}\\
+100000 & diversa & 0.0269\\
+\ldots{} & \ldots{} & \ldots{}\\
+\end{tabular}
+\end{center}}
+
+}
+
+
+\frame{
+\frametitle{Example: Form Neighbourhood of 'language'}
+
+\begin{tabular}{l l}
+  $N(language) = $ & $\{aanguage, banguage, \ldots{}, zanguage$\\
+                   & $\{language, lbnguage, \ldots{}, lznguage$\\
+                   & \ldots{}, \ldots{}, \ldots{}\\
+                   & $languaga, languagb$, $\ldots{}, languagz\}$\\
+\end{tabular}
+
+\begin{itemize}
+\item Contains $|language| \cdot |\Sigma| = 8 \cdot 26 = 208$ forms (if $\Sigma$ is the English lowercase alphabet)
+\item Which of these 208 forms have a higher than expected
+  distributional similarity $S(language, y)$ to 'language'?
+
+\item If you draw $k$ out of $n$ values the expectation is that the maximum of the $k$ values is at the $k+1$th quantile
+  
+\item The total vocabulary size is 204 002 and on $|N(language)| = 208$ trials the expected quantile to beat is the $\frac{1}{209} \cdot 204002 \approx
+  976$th quantile
+
+\item The $976$th highest value of $Sim_{language}(y)$ is $0.2839$
+
+\end{itemize}
+
+}
+  
+
+\frame{
+\frametitle{Example: Similarity and Form Neighbours of 'language'}
+
+\begin{itemize}
+\item 7 of the members of $N(language)$ have a distributional similarity
+  to 'language' higher than $0.2839$
+
+\begin{center}
+  \begin{tabular}{l|l|r|l|l}
+    $y$ & $Sim(x, y)$ & $f(y)$ & $\frac{f(y)}{f(x)+f(y)}$ & $\frac{f(y)}{f(x)+f(y)} / S(x, y)$\\ \hline
+ianguage & 0.52356 & 387 & 0.00066 & 0.00125\\
+languagc & 0.50100 & 225 & 0.00038 & 0.00076\\
+languaqe & 0.44455 & 93 & 0.00016  & 0.00035\\
+languuge & 0.29799 & 68 & 0.00012  & 0.00038\\
+languago & 0.37767 & 135 & 0.00023 & 0.00060\\
+lauguage & 0.34320 & 77 & 0.00013  & 0.00038\\
+lunguage & 0.46430 & 63 & 0.00011  & 0.00023\\
+\end{tabular}
+\end{center}
+
+\item Those terms are deemed OCR variants (of 'language') whose frequency $f(language) = 581 815$ is much higher
+
+\end{itemize}
+
+}
+
+\frame{
+\frametitle{But what about (true) minimal pairs?}
+
+\begin{itemize}
+\item A natural language may have forms that are minimal pairs that happen to be similar distributionally, and some of those with high token frequency, e.g., English \emph{in} and \emph{on}
+  \begin{itemize}
+  \item The poor man's approach (so far) will think the less frequent one is an OCR error for the other
+  \end{itemize}
+\item In most OCR post-correction systems, such corrections are avoided by recourse to the dictionary (which will whitelist both forms)
+%\begin{itemize}
+%\item In the poor man's approach we do not have access to a dictionary/whitelist
+%  \end{itemize}
+  
+\item Instead of a dictionary, the poor man can use the following heuristic
+  \begin{itemize}
+  \item If $y$ really is an OCR error for $x$ then its frequency should be derived from $x$'s frequency at some error rate $r$
+  \item We do not know $r$ but can estimate an upper bound on the rate by looking at {\bf all} pairs in $V(x, y)$ (the real OCR errors plus the minimal pairs)
+  \item If the frequency of $y$ relative to $x$ scaled by $S(x, y)$
+    (the extent to which they occur in the same circumstances) is so
+    high that it surpasses even this rate, it is not believable that
+    it is derived solely from faulty occurrences of $x$
+  \end{itemize}
+
+\item In the present test set $r_V = \frac{458626300}{2714497206} \approx 0.16895$.
+\end{itemize}
+
+}
+
+\frame{
+\frametitle{Example: OCR variants vs minimal pairs}
+
+\begin{center}
+  \begin{tabular}{l|l|r|l|l}
+    $y$ & $Sim(x, y)$ & $f(y)$ & $\frac{f(y)}{f(x)+f(y)}$ & $\frac{f(y)}{f(x)+f(y)} / S(x, y)$\\
+  \hline
+then & 0.51802 & 411360 & 0.25513 & {\bf 0.49250}\\
+them & 0.70800 & 378516 & 0.23964 & {\bf 0.33847}\\
+thcy & 0.32272 & 1256 & 0.00104 & 0.00323\\
+thoy & 0.42350 & 1760 & 0.00146 & 0.00345\\
+thej & 0.29713 & 292 & 0.00024 & 0.00081\\
+theg & 0.33179 & 143 & 0.00012 & 0.00035\\
+ihey & 0.42526 & 882 & 0.00073 & 0.00172\\
+thev & 0.43283 & 822 & 0.00068 & 0.00158\\
+tney & 0.29813 & 174 & 0.00014 & 0.00048\\
+tbey & 0.39003 & 1210 & 0.00101 & 0.00258\\
+fhey & 0.35574 & 129 & 0.00011 & 0.00030\\
+\end{tabular}
+\end{center}
+
+\begin{quote}
+  It is not believable that 'then'/'them' are OCR errors for 'they' because they correspond to error rates of 0.49/0.33, far greater than even the upper bound $r \approx 0.16895$
+\end{quote}
+
+}
+
+\frame{
+\frametitle{Evaluation of Poor Man's OCR Post-Correction}
+
+\begin{quote}
+  Evaluation of poor man's OCR post-correction on the Sydney Morning Herald 1842-1954 dataset 2 \citep{ocr:Evershed}.
+\end{quote}
+
+\begin{tabular}{l|r r|l r r}
+          & \multicolumn{2}{c}{Dataset 2} & \multicolumn{3}{c}{After OCR correction}\\ \hline
+          & Types & Tokens & & Types & Tokens\\
+          & 11 650 & 38 226 & & 11 650 & 38 226\\ \hline
+Correct & 7 655 & 32 714 & untouched & 7 383 & 32 225\\
+forms   &       &        & hypercorr. & 272 & 489\\
+\hline
+Erroneous & 3 995 & 5 512 & untouched & 3 152 & 4 276\\
+forms	   &       &       & corrected & 540 & 874\\
+           &       &       & adjusted & 303 & 362\\
+\end{tabular}
+
+\begin{quote}
+Word Error Rate improves from 85.5\% to 86.5\% (though this is
+significantly lower than the 93.7\% achieved by \citealt{ocr:Evershed})
+\end{quote}
+
+}
+
+\frame{
+\frametitle{Type reduction after OCR post-correction}
+
+\begin{tabular}{l|l|r|r|r}
+              & & \multicolumn{2}{|c|}{\# Types}\\
+Meta-language & & Before & After & Reduction\\ \hline
+English & eng & 23 114 708 & 21 681 596 & 6.2\%\\
+French & fra & 3 585 529 & 3 399 081 & 5.2\%\\
+German & deu & 2 830 285 & 2 742 546 & 3.1\%\\
+Spanish & spa & 2 490 063 & 2 373 030 & 4.7\%\\
+Portuguese & por & 716 078 & 707 583 & 1.2\%\\
+Russian & rus & 293 909 & 293 370 & 0.2\%\\
+Dutch & nld & 397 564 & 394 171 & 0.9\%\\
+Italian & ita & 555 043 & 550 359 & 0.8\%\\
+Indonesian & ind & 166 524 & 164 524 & 1.2\%\\
+\end{tabular}
+
+}
+
+
+\frame{
+\frametitle{Conclusion and Outlook}
+
+\begin{itemize}
+\item OCR correction off-the-shelf: no dictionary, no labeled training data, no thresholds, no tuning, \ldots{}
+
+\item Accuracy nevertheless lower than methods which make use of resources
+  
+\item The poor man's OCR correction method may be iterated 
+
+\item Open-source Python implementation (less than 50 lines of code)
+
+  \begin{quote}
+    \url{https://github.com/shafqatvirk/contentProfiling/ocrc.py}
+  \end{quote}
+
+\end{itemize}
+
+
+}
+
+\bibliographystyle{apalike}
+\bibliography{ocrc}
+
+
+
+\end{document}
+
+Dear Harald,
+
+Regarding your presentation of the paper below
+
+Poor Man's OCR Post-Correction: Unsupervised Recognition of Variant Spelling Applied to a Multilingual Document Collection
+
+Please note the final program is available: https://www.digitisation.eu/datech-2017-schedule/
+
+You will have 18 minutes of presentation followed by 4 minutes for questions. Please ensure you plan your talk accordingly.
+
+BEFORE YOUR PRESENTATION
+You must find the Chair of your session (in the conference room) during the break before your session and mention to them who will be presenting your paper. You must then also either upload your paper onto the presentation computer or (if you intend to use your own laptop) test that your laptop connects correctly to the data projector (via HDMI or VGA connections available).
+
+DURING YOUR PRESENTATION
+The Session Chair will inform you when you are getting close to the end of your allocated time - please keep an eye to signs from the Chair indicating the number of minutes left in your presentation.
+
+
+We are looking forward to welcoming you to Göttingen,
+
+Apostolos and Marco
