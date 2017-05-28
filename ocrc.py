@@ -21,7 +21,6 @@ def ocr_correct(gensimmodel, n = 1):
             for (rw, _) in done[w].iteritems():
                 if not done.has_key(rw):
                     done[rw] = w
-            #print w, done[w]
     return done
 
 def stopword_filter(rf, gensimmodel):
@@ -32,9 +31,27 @@ def stopword_filter(rf, gensimmodel):
     r = {w: {xw: v for (xw, v) in xws.iteritems() if ((gensimmodel.vocab[xw].count/float(gensimmodel.vocab[w].count+gensimmodel.vocab[xw].count))/v) < fr} for (w, xws) in rfo.iteritems()}
     return {k: v for (k, v) in r.iteritems() if v}
 
-import gensim
 
+#Get a similarity measure, for instance via gensim see
+#https://radimrehurek.com/gensim/models/word2vec.html
+#Here we have a trained one stored in tgv2v50.pkl
+import gensim
 model = gensim.models.Word2Vec.load("tgw2v50.pkl")
+
+#Now we can the OCR variants for any term
+print "SOV", ocrc("SOV", model, n = 1)
+print "man", ocrc("man", model, n = 1)
+print "of", ocrc("of", model, n = 1)
+
+#We can do it for all terms, avoid doing it twice when not necessary 
 rf = ocr_correct(model, n = 1)
+
+#This corrects for true minimal pairs, see the last step in the Poor man's
+#OCR post-correction method
+#Hammarstr\"om, Harald, Shafqat Virk & Markus Forsberg. 2017. Poor man's OCR post-correction: unsupervised recognition of variant spelling applied to a multilingual document collection. Proceedings of the Digital Access to Textual Cultural Heritage (DATeCH) conference.
 r = stopword_filter(rf, model)
+
+
+#And this transforms the output into a dictionary of erroneous terms to the proposed corrections
 ocrerror_to_correction = {xw: w for (w, xws) in r.iteritems() for (xw, v) in xws.iteritems()}
+
